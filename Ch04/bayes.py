@@ -18,6 +18,7 @@ def loadDataSet():
 def createVocabList(dataSet):
     vocabSet = set([])  #create empty set
     for document in dataSet:
+     #   print document
         vocabSet = vocabSet | set(document) #union of the two sets
     return list(vocabSet)
 
@@ -33,8 +34,18 @@ def trainNB0(trainMatrix,trainCategory):
     numTrainDocs = len(trainMatrix)
     numWords = len(trainMatrix[0])
     pAbusive = sum(trainCategory)/float(numTrainDocs)
-    p0Num = ones(numWords); p1Num = ones(numWords)      #change to ones() 
-    p0Denom = 2.0; p1Denom = 2.0                        #change to 2.0
+
+    #
+    p0Num = ones(numWords)
+    p1Num = ones(numWords)      #change to ones()
+    p0Denom = 2.0
+    p1Denom = 2.0                        #change to 2.0
+
+    # p0Num = zeros(numWords)
+    # p1Num = zeros(numWords)      #change to ones()
+    # p0Denom = 0.0
+    # p1Denom = 0.0                        #change to 2.0
+
     for i in range(numTrainDocs):
         if trainCategory[i] == 1:
             p1Num += trainMatrix[i]
@@ -42,6 +53,10 @@ def trainNB0(trainMatrix,trainCategory):
         else:
             p0Num += trainMatrix[i]
             p0Denom += sum(trainMatrix[i])
+
+    # print p0Num/p0Denom
+    # print p1Num/p1Denom
+
     p1Vect = log(p1Num/p1Denom)          #change to log()
     p0Vect = log(p0Num/p0Denom)          #change to log()
     return p0Vect,p1Vect,pAbusive
@@ -107,7 +122,7 @@ def spamTest():
         wordVector = bagOfWords2VecMN(vocabList, docList[docIndex])
         if classifyNB(array(wordVector),p0V,p1V,pSpam) != classList[docIndex]:
             errorCount += 1
-            print "classification error",docList[docIndex]
+            print "classification error expect",classList[docIndex],docList[docIndex]
     print 'the error rate is: ',float(errorCount)/len(testSet)
     #return vocabList,fullText
 
