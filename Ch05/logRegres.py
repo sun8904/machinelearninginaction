@@ -1,8 +1,10 @@
+# coding =utf-8
 '''
 Created on Oct 27, 2010
 Logistic Regression Working Module
 @author: Peter
 '''
+
 from numpy import *
 
 def loadDataSet():
@@ -15,7 +17,11 @@ def loadDataSet():
     return dataMat,labelMat
 
 def sigmoid(inX):
-    return 1.0/(1+exp(-inX))
+    # avoid exp(-inx)
+    if inX >= 0.0:
+        return 1.0 / (1 + exp(-inX))
+    else:
+        return exp(inX) / (1 + exp(inX))
 
 def gradAscent(dataMatIn, classLabels):
     dataMatrix = mat(dataMatIn)             #convert to NumPy matrix
@@ -25,7 +31,7 @@ def gradAscent(dataMatIn, classLabels):
     maxCycles = 500
     weights = ones((n,1))
     for k in range(maxCycles):              #heavy on matrix operations
-        h = sigmoid(dataMatrix*weights)     #matrix mult
+        h = 1.0 / (1 + exp(-dataMatrix*weights))   #matrix mult
         error = (labelMat - h)              #vector subtraction
         weights = weights + alpha * dataMatrix.transpose()* error #matrix mult
     return weights
@@ -48,21 +54,27 @@ def plotBestFit(weights):
     ax.scatter(xcord2, ycord2, s=30, c='green')
     x = arange(-3.0, 3.0, 0.1)
     y = (-weights[0]-weights[1]*x)/weights[2]
+   # y= [(-weights[0]-weights[1]* xi)/weights[2] for xi in x]
     ax.plot(x, y)
     plt.xlabel('X1'); plt.ylabel('X2');
     plt.show()
 
 def stocGradAscent0(dataMatrix, classLabels):
+    dataMatrix = array(dataMatrix)
     m,n = shape(dataMatrix)
     alpha = 0.01
     weights = ones(n)   #initialize to all ones
-    for i in range(m):
-        h = sigmoid(sum(dataMatrix[i]*weights))
-        error = classLabels[i] - h
-        weights = weights + alpha * error * dataMatrix[i]
+    for k in range(40):
+        for j in range(m):
+            i=int( random.uniform(0,m-1))
+            i=j
+            h = sigmoid(sum(dataMatrix[i]*weights))
+            error = classLabels[i] - h
+            weights = weights + alpha * error * dataMatrix[i]
     return weights
 
 def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    dataMatrix = array(dataMatrix)
     m,n = shape(dataMatrix)
     weights = ones(n)   #initialize to all ones
     for j in range(numIter):
@@ -106,7 +118,8 @@ def colicTest():
     return errorRate
 
 def multiTest():
-    numTests = 10; errorSum=0.0
+    numTests = 10;
+    errorSum=0.0
     for k in range(numTests):
         errorSum += colicTest()
     print "after %d iterations the average error rate is: %f" % (numTests, errorSum/float(numTests))
